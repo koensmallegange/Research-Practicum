@@ -24,7 +24,6 @@ def make_discriminator_model(BATCH_SIZE, data_scaled):
     return model
 
 
-
 @tf.function
 def train_step(real_data, generator, discriminator, cross_entropy, generator_optimizer, discriminator_optimizer, BATCH_SIZE, NOISE_DIM):
     '''Trains the GAN for one step'''	
