@@ -12,6 +12,7 @@ import datetime
 from tensorflow.keras import layers
 from sklearn.preprocessing import MinMaxScaler
 from networks import make_discriminator_model, make_generator_model, train
+from kerastuner.tuners import RandomSearch
 
 
 # Find the config file
@@ -24,6 +25,9 @@ with open(config_path) as config_file:
     NOISE_DIM = params['NOISE_DIM']
     BUFFER_SIZE = params['BUFFER_SIZE']
     EPOCHS = params['EPOCHS']
+    NEURONS_GEN = params['NEURONS_GEN']
+    NEURONS_DISC = params['NEURONS_DISC']
+    DROPOUT = params['DROPOUT']
     random_samples = params['random_samples']
     accuracy = params['accuracy']
     step_daily = params['step_daily']
@@ -44,9 +48,9 @@ data_scaled = scaler.fit_transform(data)
 # Define the training dataset
 train_dataset = tf.data.Dataset.from_tensor_slices(data_scaled).shuffle(BUFFER_SIZE).batch(BATCH_SIZE)
 
-# Instantiate the models, loss function and optimizers
-generator = make_generator_model(BATCH_SIZE, NOISE_DIM, data_scaled)
-discriminator = make_discriminator_model(BATCH_SIZE, data_scaled)
+# Instantiate the models, loss function and optimizer
+generator = make_generator_model(BATCH_SIZE, NOISE_DIM, NEURONS_GEN, data_scaled)
+discriminator = make_discriminator_model(BATCH_SIZE, NEURONS_DISC, DROPOUT, data_scaled)
 cross_entropy = tf.keras.losses.BinaryCrossentropy()
 generator_optimizer = tf.keras.optimizers.Adam()
 discriminator_optimizer = tf.keras.optimizers.Adam()

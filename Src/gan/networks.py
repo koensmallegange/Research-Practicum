@@ -3,25 +3,30 @@ This file contains the functions that define the networks used in the GAN.
 '''
 
 import tensorflow as tf
-from tensorflow.keras import layers
+from tensorflow.keras import layers, Model
 
 
-def make_generator_model(BATCH_SIZE, NOISE_DIM, data_scaled):
+def make_generator_model(BATCH_SIZE, NOISE_DIM, NEURONS_GEN, data_scaled):
     '''Generates a network that generates synthetic data'''
-    model = tf.keras.Sequential([
+    generator = tf.keras.Sequential([
         layers.Dense(BATCH_SIZE, activation='relu', input_shape=(NOISE_DIM,)),
+        layers.BatchNormalization(),
+        layers.Dense(NEURONS_GEN, activation='relu'),
+        layers.BatchNormalization(),
         layers.Dense(data_scaled.shape[1], activation='tanh')
     ])
-    return model
+    return generator
 
-
-def make_discriminator_model(BATCH_SIZE, data_scaled):
+def make_discriminator_model(BATCH_SIZE, NEURONS_DISC, DROPOUT, data_scaled):
     '''Generates a network that discriminates real from synthetic data'''
-    model = tf.keras.Sequential([
+    discriminator = tf.keras.Sequential([
         layers.Dense(BATCH_SIZE, activation='relu', input_shape=(data_scaled.shape[1],)),
+        layers.Dropout(DROPOUT),
+        layers.Dense(NEURONS_DISC, activation='relu'),
+        layers.Dropout(DROPOUT),
         layers.Dense(1, activation='sigmoid')
     ])
-    return model
+    return discriminator
 
 
 @tf.function
@@ -62,3 +67,4 @@ def train(dataset, epochs, generator, discriminator, cross_entropy, generator_op
 
         # Display progress and remove previous output
         print(f'Training status: {round(epoch/epochs*100, 2)} % of {epochs} epochs completed', end='\r')
+   
